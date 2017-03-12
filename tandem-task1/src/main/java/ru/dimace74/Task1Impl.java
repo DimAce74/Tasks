@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <h1>Задание №1</h1>
@@ -35,7 +37,17 @@ public class Task1Impl implements IStringRowsListSorter {
                 }
             }
         private String[] stringTokenizer (String string) {
-
+            Pattern pattern = Pattern.compile("(\\d+)");
+            Matcher matcher = pattern.matcher(string);
+            List<String> digitSubstrings = new ArrayList<>();
+            while (matcher.find()) {
+                digitSubstrings.add(matcher.group());
+            }
+            if (digitSubstrings.isEmpty()) {
+                return null;
+            }else {
+                int maxLength = digitSubstrings.stream().
+            }
         }
 
         }
