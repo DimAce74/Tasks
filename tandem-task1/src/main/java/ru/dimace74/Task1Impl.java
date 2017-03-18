@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * <h1>Задание №1</h1>
@@ -19,13 +20,12 @@ public class Task1Impl implements IStringRowsListSorter {
 
     @Override
     public void sort(final List<String[]> rows, final int columnIndex) {
-        for (String[] row : rows) {
 
-        }
-        class columnComparator implements Comparator<String>{
-
+        class ColumnComparator implements Comparator<String[]>{
             @Override
-            public int compare(String a, String b) {
+            public int compare(String[] arr1, String[] arr2) {
+                String a = arr1[columnIndex];
+                String b = arr2[columnIndex];
                 if (a == null) {
                     return (b == null) ? 0:-1;
                 } else if (b == null) {
@@ -36,7 +36,7 @@ public class Task1Impl implements IStringRowsListSorter {
                     return 1;
                 }
             }
-        private String[] stringTokenizer (String string) {
+        private List<String> stringTokenizer (String string) {
             Pattern pattern = Pattern.compile("(\\d+)");
             Matcher matcher = pattern.matcher(string);
             List<String> digitSubstrings = new ArrayList<>();
@@ -44,13 +44,34 @@ public class Task1Impl implements IStringRowsListSorter {
                 digitSubstrings.add(matcher.group());
             }
             if (digitSubstrings.isEmpty()) {
-                return null;
+                throw new IllegalArgumentException();
             }else {
-                int maxLength = digitSubstrings.stream().
-            }
-        }
+                int maxLength = digitSubstrings.stream()
+                        .map(String::length)
+                        .max(Integer::compareTo)
+                        .get();
+                List<String> maxDigitSubstrings = digitSubstrings.stream()
+                        .filter(str-> str.length()==maxLength)
+                        .collect(Collectors.toList());
+                List<Integer> listOfIndexes = maxDigitSubstrings.stream()
+                        .map(string::indexOf)
+                        .collect(Collectors.toList());
+                List<String> result = new ArrayList<>();
+                result.add(string.substring(0, listOfIndexes.get(0)));
+                if (listOfIndexes.size()==1){
+                    result.add(string.substring(listOfIndexes.get(0)))
+                }
+                for (int i=0; i<listOfIndexes.size()-1; i++){
+                    while (string.length()>(listOfIndexes.get(i)+maxLength)) {
+                        result.add(string.substring(listOfIndexes.get(i), (listOfIndexes.get(i) + maxLength)));
+
+                    }
+                }
 
         }
+
+        rows.sort(new ColumnComparator());
+
     }
 
 }
