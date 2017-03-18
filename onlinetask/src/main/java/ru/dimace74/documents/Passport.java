@@ -1,16 +1,33 @@
 package ru.dimace74.documents;
 
-import java.util.Date;
+import sun.util.calendar.BaseCalendar.Date;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
 public class Passport implements Document {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
     private String lastName;
     private String firstName;
     private String patronymic;
-    private Integer serialOfPassport;
+    private Integer seriesOfPassport;
     private Integer numberOfPassport;
     private Date dateOfIssue;
 
-    public Passport() {
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getLastName() {
@@ -38,11 +55,11 @@ public class Passport implements Document {
     }
 
     public Integer getSerialOfPassport() {
-        return serialOfPassport;
+        return seriesOfPassport;
     }
 
     public void setSerialOfPassport(Integer serialOfPassport) {
-        this.serialOfPassport = serialOfPassport;
+        this.seriesOfPassport = serialOfPassport;
     }
 
     public Integer getNumberOfPassport() {
