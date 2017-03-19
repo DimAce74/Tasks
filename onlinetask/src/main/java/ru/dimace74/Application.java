@@ -6,11 +6,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import ru.dimace74.config.SpringConfig;
-import ru.dimace74.documents.CertificateOfMarriage;
 import ru.dimace74.documents.Document;
-import ru.dimace74.documents.Passport;
 import ru.dimace74.services.DocService;
-import ru.dimace74.services.PassportService;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -111,76 +108,16 @@ public class Application {
     } catch (InstantiationException | IllegalAccessException e) {
             throw new IllegalArgumentException();
         }
-        BeanInfo beanInfo = null;
+        BeanInfo beanInfo;
         try {
             beanInfo = Introspector.getBeanInfo(docType);
         } catch (IntrospectionException e) {
-            e.printStackTrace();
+            throw new IllegalArgumentException();
         }
         for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()){
-            String propertyName = propertyDescriptor.getName();
-            Class propertyType = propertyDescriptor.getPropertyType();
-            Method method = propertyDescriptor.getWriteMethod();
-
-            if (propertyName.equals("class") || propertyName.equals("id")){
-                continue;
-            } else if (propertyType.equals(Date.class)){
-                System.out.println("Введите значение " + propertyName);
-                int year=0;
-                int day=0;
-                int month=0;
-                System.out.println("День:");
-                try {
-                    day = Integer.parseInt(reader.readLine());
-                    System.out.println("Порядковый номер месяца:");
-                    month = Integer.parseInt(reader.readLine())-1;
-                    System.out.println("Год:");
-                    year = Integer.parseInt(reader.readLine());
-                } catch (IOException e){
-                    System.out.println("Неверные данные!");
-                    menuCreateDoc();
-                }
-                Calendar calendar = new Calendar.Builder().setDate(year, month, day).build();
-                try {
-                    method.invoke(document, calendar.getTime());
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-            } else if (propertyType.equals(Integer.class)) {
-                System.out.println("Введите значение " + propertyName);
-                try {
-                    method.invoke(document, Integer.parseInt(reader.readLine()));
-                } catch (IllegalAccessException | InvocationTargetException | IOException e) {
-                    e.printStackTrace();
-                }
-            } else if (propertyType.equals(String.class)) {
-                System.out.println("Введите значение " + propertyName);
-                try {
-                    method.invoke(document, reader.readLine());
-                } catch (IllegalAccessException | InvocationTargetException | IOException e) {
-                    e.printStackTrace();
-                }
-            } else if (Arrays.stream(propertyType.getInterfaces()).filter(aClass -> aClass.equals(Document.class)).count()==1){
-                System.out.println("Введите значение " + propertyName);
-                System.out.println("Введите ID документа:");
-                Class<DocService> serviceType;
-                try {
-                    serviceType= (Class<DocService>) Class.forName("ru.dimace74.services." +getNameFromFullQualName(propertyType.getName())+"Service");
-
-                } catch (ClassNotFoundException e) {
-                    throw new IllegalArgumentException();
-                }
-                DocService innerService = context.getBean(serviceType);
-                try {
-                    method.invoke(document, innerService.findById(Integer.parseInt(reader.readLine())));
-                } catch (IllegalAccessException | InvocationTargetException | IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                System.out.println("Такой тип поля: "+ propertyType.getName()+" не предусмотрен, обратитесь к разработчику!");
-                menuAction();
+            if (!propertyDescriptor.getName().equals("class") && !propertyDescriptor.getName().equals("id")) {
+                editAttribute(propertyDescriptor, document);
             }
-
         }
         service.save(document);
         System.out.println("Документ успешно сохранен!");
@@ -188,6 +125,119 @@ public class Application {
     }
 
     private static void menuEditDoc() {
+        System.out.println("Введите ID документа, который Вы хотите изменить:");
+        int id = 0;
+        try {
+            id = Integer.parseInt(reader.readLine());
+        } catch (IOException e) {
+            System.out.println("Это не число!");
+            menuEditDoc();
+        }
+        Object document = service.findById(id);
+        if (document == null) {
+            System.out.println("Такого документа не существует!");
+            menuEditDoc();
+        } else {
+            menuEditAttribute(document);
+        }
+    }
+
+    private static void menuEditAttribute(Object document){
+        BeanInfo beanInfo;
+        try {
+            beanInfo = Introspector.getBeanInfo(docType);
+        } catch (IntrospectionException e) {
+            throw new IllegalArgumentException();
+        }
+        Map<Integer, PropertyDescriptor> fieldsMap = new HashMap<>();
+        int key = 0;
+        for (PropertyDescriptor propertyDescriptor : beanInfo.getPropertyDescriptors()) {
+            String propertyName = propertyDescriptor.getName();
+            if (!propertyName.equals("class") && !propertyName.equals("id")){
+                key++;
+                fieldsMap.put(key, propertyDescriptor);
+            }
+        }
+        System.out.println("Какое поле Вы хотите изменить?");
+        for (int i =1; i<fieldsMap.size()+1; i++){
+            System.out.println(i + ") "+ fieldsMap.get(i).getName()+";");
+        }
+        int choice = 0;
+        try {
+            choice = Integer.parseInt(reader.readLine());
+        } catch (IOException e) {
+            System.out.println("Это не число!");
+            menuEditAttribute(document);
+        }
+        PropertyDescriptor propertyDescriptor = fieldsMap.get(choice);
+        editAttribute(propertyDescriptor, document);
+        service.save(document);
+        System.out.println("Документ успешно изменен!");
+        menuTop();
+    }
+
+    private static void editAttribute (PropertyDescriptor propertyDescriptor, Object document){
+        String propertyName = propertyDescriptor.getName();
+        Class propertyType = propertyDescriptor.getPropertyType();
+        Method method = propertyDescriptor.getWriteMethod();
+
+        if (propertyType.equals(Date.class)){
+            System.out.println("Введите значение " + propertyName);
+            int year=0;
+            int day=0;
+            int month=0;
+            System.out.println("День:");
+            try {
+                day = Integer.parseInt(reader.readLine());
+                System.out.println("Порядковый номер месяца:");
+                month = Integer.parseInt(reader.readLine())-1;
+                System.out.println("Год:");
+                year = Integer.parseInt(reader.readLine());
+            } catch (IOException e){
+                System.out.println("Неверные данные!");
+                menuCreateDoc();
+            }
+            Calendar calendar = new Calendar.Builder().setDate(year, month, day).build();
+            try {
+                method.invoke(document, calendar.getTime());
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        } else if (propertyType.equals(Integer.class)) {
+            System.out.println("Введите значение " + propertyName);
+            try {
+                method.invoke(document, Integer.parseInt(reader.readLine()));
+            } catch (IllegalAccessException | InvocationTargetException | IOException e) {
+                e.printStackTrace();
+            }
+        } else if (propertyType.equals(String.class)) {
+            System.out.println("Введите значение " + propertyName);
+            try {
+                method.invoke(document, reader.readLine());
+            } catch (IllegalAccessException | InvocationTargetException | IOException e) {
+                e.printStackTrace();
+            }
+        } else if (Arrays.stream(propertyType.getInterfaces()).filter(aClass -> aClass.equals(Document.class)).count()==1){
+            System.out.println("Введите значение " + propertyName);
+            System.out.println("Введите ID документа:");
+            Class<DocService> serviceType;
+            try {
+                serviceType= (Class<DocService>) Class.forName("ru.dimace74.services." +getNameFromFullQualName(propertyType.getName())+"Service");
+
+            } catch (ClassNotFoundException e) {
+                throw new IllegalArgumentException();
+            }
+            DocService innerService = context.getBean(serviceType);
+            try {
+                method.invoke(document, innerService.findById(Integer.parseInt(reader.readLine())));
+            } catch (IllegalAccessException | InvocationTargetException | IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("Такой тип поля: "+ propertyType.getName()+" не предусмотрен, обратитесь к разработчику!");
+            menuAction();
+        }
+
     }
 
     private static String getNameFromFullQualName (String fullName){
