@@ -40,10 +40,8 @@ public class Application {
             key++;
             namesOfDocuments.put(key, name);
         }
-
         reader = new BufferedReader(new InputStreamReader(System.in));
         menuTop();
-
     }
 
     private static void menuTop() {
@@ -52,7 +50,7 @@ public class Application {
             System.out.println(i+") " + getNameFromFullQualName(namesOfDocuments.get(i)) + ";");
         }
 
-        String choice = "";
+        String choice;
         try {
             choice = reader.readLine();
         } catch (IOException e) {
@@ -74,10 +72,7 @@ public class Application {
             menuTop();
         }
         service = context.getBean(serviceType);
-
         menuAction();
-
-
     }
 
     private static void menuAction() {
