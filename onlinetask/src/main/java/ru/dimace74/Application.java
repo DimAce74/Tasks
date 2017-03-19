@@ -170,6 +170,13 @@ public class Application {
             menuEditAttribute(document);
         }
         PropertyDescriptor propertyDescriptor = fieldsMap.get(choice);
+        Method readMethod = propertyDescriptor.getReadMethod();
+        try {
+            String actualValue = readMethod.invoke(document).toString();
+            System.out.println("Текущее значение: " + actualValue);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
+        }
         editAttribute(propertyDescriptor, document);
         service.save(document);
         System.out.println("Документ успешно изменен!");

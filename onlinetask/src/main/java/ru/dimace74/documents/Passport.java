@@ -82,4 +82,17 @@ public class Passport implements Document {
     public void setDateOfIssue(Date dateOfIssue) {
         this.dateOfIssue = dateOfIssue;
     }
+
+    @Override
+    public String toString() {
+        return "Passport{" +
+                "id=" + id +
+                ", lastName='" + lastName + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", patronymic='" + patronymic + '\'' +
+                ", seriesOfPassport=" + seriesOfPassport +
+                ", numberOfPassport=" + numberOfPassport +
+                ", dateOfIssue=" + dateOfIssue +
+                '}';
+    }
 }

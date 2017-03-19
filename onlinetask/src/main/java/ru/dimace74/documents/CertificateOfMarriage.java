@@ -66,4 +66,15 @@ public class CertificateOfMarriage implements Document {
     public void setWifesPassport(Passport wifesPassport) {
         this.wifesPassport = wifesPassport;
     }
+
+    @Override
+    public String toString() {
+        return "CertificateOfMarriage{" +
+                "id=" + id +
+                ", dateOfRegistration=" + dateOfRegistration +
+                ", registrationAuthorithy='" + registrationAuthorithy + '\'' +
+                ", husbandsPassport=" + husbandsPassport +
+                ", wifesPassport=" + wifesPassport +
+                '}';
+    }
 }
