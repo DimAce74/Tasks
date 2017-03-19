@@ -81,11 +81,12 @@ public class Application {
     }
 
     private static void menuAction() {
-        System.out.println("Выбран тип документа: " + docType.getName());
+        System.out.println("Выбран тип документа: " + getNameFromFullQualName(docType.getName()));
         System.out.println("Что вы хотите сделать?");
         System.out.println("1) Изменить существующий документ;");
-        System.out.println("2) Создать новый документ");
-        int choice = 0;
+        System.out.println("2) Создать новый документ;");
+        System.out.println("0) Вернуться к предыдущему меню");
+        int choice;
         try{
             choice = Integer.parseInt(reader.readLine());
         } catch (IOException e){
@@ -95,6 +96,8 @@ public class Application {
             menuEditDoc();
         } else if (choice==2) {
             menuCreateDoc();
+        } else if (choice==0) {
+            menuTop();
         } else {
             System.out.println("Такого варианта не существует!");
             menuAction();
