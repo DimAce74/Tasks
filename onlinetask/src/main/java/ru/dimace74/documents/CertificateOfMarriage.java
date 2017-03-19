@@ -1,22 +1,28 @@
 package ru.dimace74.documents;
 
-import sun.util.calendar.BaseCalendar.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+
+import java.util.Date;
 
 @Entity
+@Table(name = "certificate_of_marriage")
 public class CertificateOfMarriage implements Document {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "certificate_of_marriage_id")
     private Integer id;
-
+    @Column(name = "date_of_registration")
+    @Temporal(TemporalType.DATE)
     private Date dateOfRegistration;
+    @Column(name = "registration_authorithy")
     private String registrationAuthorithy;
+    @OneToOne
+    @JoinColumn(name = "husbands_passport_id")
     private Passport husbandsPassport;
+    @OneToOne
+    @JoinColumn(name = "wifes_passport_id")
     private Passport wifesPassport;
 
 
